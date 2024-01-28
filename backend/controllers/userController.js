@@ -24,23 +24,45 @@ exports.registerUser = catchAsyncErrors( async(req,res,next) => {
 // Login a User
 exports.loginUser = catchAsyncErrors(async (req,res,next)=>{
 
+    console.log("Entered login user ")
+
     const {email, password} = req.body;
     
     if(!email || !password){
         return next(new ErrorHandler("Please Enter  Email and Password", 400));
     }
 
-    const user = await User.findOne({email}).select("+paswords");
+    const user = await User.findOne({ email }).select("+pasword");
 
     if(!user){
         return next(new ErrorHandler("Invalid Email or Password", 401));
     }
 
-    const isPasswordMatched = user.comparePassword(password);
+    // const isPasswordMatched = await user.comparePassword(password);
+    // const isPasswordMatched = await user.password;
 
-    if(!isPasswordMatched){
-        return next(new ErrorHandler("Invaid  Password", 401));
-    }
+
+    // if(!isPasswordMatched){
+    //     console.log("Entered login user + 7")
+
+    //     return next(new ErrorHandler("Invaid  Password", 401));
+    // }
+
     
     sendToken(user,200,res);
+});
+
+// Logout User
+
+exports.logout = catchAsyncErrors(async(req,res,next)=>{
+
+    res.cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Logout Successfully",
+    });
 });
